@@ -1,0 +1,13 @@
+{
+	"name": "x4-electron-app",
+	"description": "X4 Electron App Demo",
+	"author": "r-libre / fidjy",
+	"main": "electron-main.js",
+	"title": "X4 Electron demo",
+	"version": "1.0.0",
+	"single-instance": true,
+	"nodejs": true,
+	"window": {
+		"icon": "assets/img/logo.png"
+	}
+}

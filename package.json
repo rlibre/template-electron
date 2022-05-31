@@ -13,6 +13,8 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@chialab/esbuild-plugin-html": "^0.15.28",
+		"electron": "^19.0.1",
+		"esbuild-plugin-copy": "^1.3.0",
 		"esbuild-plugin-less": "^1.1.6"
 	},
 	"dependencies": {
