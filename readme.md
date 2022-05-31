@@ -7,6 +7,9 @@ npm i
 npm run build 
 ```
 
-then start the debugger with F5
+Then start the debugger with F5
+
+>[!NOTE]
+> For the demo, we have included MontSerrat font in the app.less file.
 
 Please see [x4js documentation](https://x4js.org/doc)
