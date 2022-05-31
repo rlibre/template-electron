@@ -1,0 +1,21 @@
+{
+	"name": "template",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"build-dev": "node build.mjs debug",
+		"build-prod": "node build.mjs release",
+		"serve": "cd bin && live-server --entry-file=bin/index.html"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@chialab/esbuild-plugin-html": "^0.15.28",
+		"esbuild-plugin-less": "^1.1.6"
+	},
+	"dependencies": {
+		"x4js": "^1.4.20"
+	}
+}
