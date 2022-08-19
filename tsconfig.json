@@ -1,11 +1,21 @@
 {
     "compilerOptions": {
-        "target": "esnext", 
-        "lib": ["esnext","dom"],
-        "experimentalDecorators": true,
-        "moduleResolution": "node"
+        "target": "es2020",
+      	"lib": ["es2020","dom"],
+		"incremental": true,
+		"pretty": false,
+		"declaration": false,
+		"outDir": "bin",
+		"sourceMap": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"experimentalDecorators": true,
+		"strictNullChecks": false
     },
-	"include": [
-		"./src/*",
-	]
+	"files": [
+		"src/app.ts"
+	],
+	"include": [],
+	"exclude": [],
 }

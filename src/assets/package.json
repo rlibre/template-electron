@@ -1,13 +1,19 @@
 {
-	"name": "x4-electron-app",
-	"description": "X4 Electron App Demo",
-	"author": "r-libre / fidjy",
+	"name": "template",
+	"description": "Electron template",
 	"main": "electron-main.js",
-	"title": "X4 Electron demo",
+	"title": "Electron template",
 	"version": "1.0.0",
 	"single-instance": true,
 	"nodejs": true,
 	"window": {
-		"icon": "assets/img/logo.png"
+		"title": "Electron template",
+		"icon": "assets/img/logo-fidjy.png"
+	},
+	"dependencies": {
+		"x4js": "^1.4"
+	},
+	"devDependencies": {
+		"electron": "^19.0.1"
 	}
 }

@@ -3,7 +3,11 @@
 // Modules to control application life and create native browser window
 const { app, dialog, BrowserWindow, Menu, ipcMain } = require('electron')
 
+app.allowRendererProcessReuse = false;
+
 const isMac = process.platform === 'darwin'
+
+
 
 
 // ::  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -11,7 +15,6 @@ const isMac = process.platform === 'darwin'
 
 /**
  * sync
- * show open dialog box
  */
 
  ipcMain.on( 'showOpenDialog', ( event, params ) => {
@@ -27,7 +30,6 @@ const isMac = process.platform === 'darwin'
 
 /**
  * sync
- * show save dialog box
  */
 
 ipcMain.on( 'showSaveDialog', ( event, params ) => {
@@ -44,11 +46,15 @@ ipcMain.on( 'showSaveDialog', ( event, params ) => {
 
 /**
  * async
- * change the window title
  */
 
 ipcMain.on( 'setTitle', (event, params) => {
 	mainWindow.setTitle( params );
+});
+
+ipcMain.on( 'setIcon', (event, params) => {
+	mainWindow.setIcon( params );
+	event.returnValue = true;
 });
 
 
@@ -71,6 +77,7 @@ ipcMain.on( 'enableMenubar', (event, enable ) => {
 	}
 
 	enableMenu( appMmenu );
+	event.returnValue = true;
 } );
 
 /**
@@ -81,6 +88,80 @@ ipcMain.on( 'getPath', ( event, ptype ) => {
 	event.returnValue = app.getPath( ptype );
 });
 
+/**
+ * async
+ */
+
+ipcMain.on( "openDevTools", ( event, side ) => {
+	mainWindow.webContents.openDevTools({ mode: side ?? 'bottom' } );
+} );
+
+
+/**
+ * sync
+ */
+
+function makeMenu( data ) {
+
+	let main = mainWindow.webContents;
+
+	return data.map( (e) => {
+
+		// popup menu
+		if( e && e.label && e.submenu ) {
+
+			return {
+				label: e.label,
+				submenu: e.submenu.map( item => {
+					
+					if( !item ) {
+						return null;
+					}
+
+					if( item.submenu ) {
+						const tmp = makeMenu( [item] );
+						return tmp[0];
+					}
+					
+					if( item.role ) {
+						return item;
+					}
+
+					if( item.type && item.type=="separator") {
+						return item;
+					}
+					
+					if( item.action ) {
+						let itm = {
+							label: item.label,
+							click: ( ) => { main.send( item.action, item.params ); }
+						};
+
+						if( item.checked!==undefined ) {
+							itm.type = 'checkbox';
+							itm.checked = item.checked;
+						}
+
+						return itm;
+					}
+				} ).filter( e => e!=null )
+			};
+		}
+		else {
+			return null;
+		}
+
+	}).filter( e => e!=null );
+}
+
+ipcMain.on( "setupMenus", ( event, data ) => {
+
+	const template = makeMenu( data );
+	appMmenu = Menu.buildFromTemplate(template)
+	Menu.setApplicationMenu(appMmenu);
+
+	event.returnValue = true;
+} );
 
 
 
@@ -95,64 +176,22 @@ let appMmenu = null;
 
 function createMenus( browser ) {
 
-	let view = browser.webContents;
-
 	const template = [
-		// { role: 'appMenu' }
-		...(isMac ? [{
-			label: app.name,
-			submenu: [
-				{ role: 'about' },
-				{ type: 'separator' },
-				{ role: 'services' },
-				{ type: 'separator' },
-				{ role: 'hide' },
-				{ role: 'hideothers' },
-				{ role: 'unhide' },
-				{ type: 'separator' },
-				{ role: 'quit' }
-			]
-		}] : []),
-
-		// { role: 'fileMenu' }
 		{
-			label: 'File',
-			submenu: [
-				{ label: 'Open', click: ( ) => view.send( 'openFile' ) },
-				{ label: 'New', click: ( ) => view.send( 'createFile' ) },
-				{ label: 'Save', click: ( ) => view.send( 'save' ) },
-				{ label: 'Save As', click: ( ) => view.send( 'saveAs' ) },
-				{ type: 'separator' },
-				{ label: 'Preferences', click: ( ) => view.send( 'preferences' ) },
-				{ type: 'separator' },
-				{ label: 'Exit', role: 'quit' },
-			]
-		},
-
-		{
-			label: 'View',
+			label: 'Fichier',
 			submenu: [
 				{ role: 'toggleDevTools' },
-				{ role: 'togglefullscreen' }
+				{ type: "separator" },
+				{ label: 'Quitter', role: 'quit' },
 			]
 		},
-				
-		{
-			role: 'help',
-			submenu: [
-				{
-					label: 'About',
-					click: ( ) => view.send( 'about' ),
-				}
-		  	]
-		}
-	]
+	];
 
 	appMmenu = Menu.buildFromTemplate(template)
 	Menu.setApplicationMenu(appMmenu);
 }
 
-function createWindow() {
+async function createWindow() {
 	// Create the browser window.
 	mainWindow = new BrowserWindow({
 		width: 800,
@@ -163,21 +202,20 @@ function createWindow() {
 			nodeIntegration: true,
 			contextIsolation: false,
 		}
-	})
+	});
 	
-
+	mainWindow.maximize();
+		
 	createMenus( mainWindow );
 
 	// and load the index.html of the app.
-	mainWindow.loadFile('index.html')
-	process.nextTick(() => {
-		mainWindow.maximize();
+	await mainWindow.loadFile('./index.html')
+
+	process.nextTick( () => {
 		mainWindow.show();
-	});
+	} );
 
-
-	// Open the DevTools.
-	mainWindow.webContents.openDevTools({ mode: 'detach' })
+	mainWindow.webContents.on('context-menu', handleContextMenu);
 }
 
 // This method will be called when Electron has finished
@@ -198,6 +236,100 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 
 app.on('window-all-closed', function () {
-	if (process.platform !== 'darwin') app.quit()
+	/*if (process.platform !== 'darwin')*/ app.quit()
 })
 
+// by default, electron do not show context menus
+function handleContextMenu(event, props) {
+	const win = mainWindow.webContents;
+
+	const { editFlags } = props;
+	const hasSelText = props.selectionText.trim().length > 0;
+	
+	let menu = []
+
+	function word(suggestion) {
+		return {
+			id: 'dictionarySuggestions',
+			label: suggestion,
+			click(menuItem) {
+				win.replaceMisspelling(menuItem.label);
+			}
+		};
+	}
+
+	if (props.isEditable && hasSelText && props.misspelledWord && props.dictionarySuggestions.length > 0) {
+		menu = props.dictionarySuggestions.map(suggestion => word(suggestion) );
+		menu.push( { type: "separator" } );
+	}
+
+	if (props.isEditable && hasSelText && editFlags.canCut ) {
+		menu.push({
+			id: 'cut',
+			label: 'Cu&t',
+			visible: props.isEditable,
+			click(menuItem) {
+				if (!menuItem.transform && win) {
+					win.cut();
+				}
+				else {
+					clipboard.writeText(props.selectionText);
+				}
+			}
+		});
+	}
+
+	if (hasSelText && hasSelText && editFlags.canCopy ) {
+		menu.push({
+			id: 'copy',
+			label: '&Copy',
+			visible: props.isEditable || hasSelText,
+			click(menuItem) {
+				if (!menuItem.transform && win) {
+					win.copy();
+				}
+				else {
+					clipboard.writeText(props.selectionText);
+				}
+			}
+		});
+	}
+
+	if( props.isEditable && editFlags.canPaste) {
+		menu.push({
+			id: 'paste',
+			label: '&Paste',
+			click(menuItem) {
+				if (menuItem.transform) {
+					let clipboardContent = clipboard.readText(props.selectionText);
+					win.insertText(clipboardContent);
+				}
+				else {
+					win.paste();
+				}
+			}
+		});
+
+	}
+
+	//	services: {
+	//		id: 'services',
+	//			label: 'Services',
+	//				role: 'services',
+	//					visible: process.platform === 'darwin' && (props.isEditable || hasText)
+	//	}
+	//};
+
+	//let menuTemplate = [
+	//	...dictionarySuggestions,
+	//	defaultActions.cut,
+	//	defaultActions.copy,
+	//	defaultActions.paste,
+	//	//options.showServices && defaultActions.services,
+	//];
+
+	if (menu.length > 0) {
+		const ctxmenu = Menu.buildFromTemplate(menu);
+		ctxmenu.popup(win);
+	}
+}

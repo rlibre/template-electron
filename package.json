@@ -1,23 +1,21 @@
 {
-	"name": "template",
+	"name": "electron-template",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build-dev": "node build.mjs debug",
-		"build-prod": "node build.mjs release",
-		"serve": "cd bin && live-server --entry-file=bin/index.html"
+		"build-dev": "x4build electron debug watch hmr",
+		"build-prod": "x4build electron release"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
-	"devDependencies": {
-		"@chialab/esbuild-plugin-html": "^0.15.28",
-		"electron": "^19.0.1",
-		"esbuild-plugin-copy": "^1.3.0",
-		"esbuild-plugin-less": "^1.1.6"
-	},
 	"dependencies": {
-		"x4js": "^1.4.20"
+		"electron": "^20.0.3",
+		"x4electron": "^1.4.5",
+		"x4js": "^1.4"
+	},
+	"devDependencies": {
+		"x4build": "^1.0"
 	}
 }
