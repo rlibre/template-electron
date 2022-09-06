@@ -2,7 +2,7 @@
 	"name": "electron-template",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.js",
+	"main": "src/app.ts",
 	"scripts": {
 		"build-dev": "x4build electron debug watch hmr",
 		"build-prod": "x4build electron release"
