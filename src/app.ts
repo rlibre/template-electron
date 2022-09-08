@@ -1,4 +1,5 @@
 // import required elements
+import { installHMR, sendAsyncIPC } from 'x4electron';
 import { Application, VLayout, Label } from 'x4js'
 
 // create the application
@@ -17,9 +18,10 @@ let frame = new VLayout( {
 // define it as the app main frame.
 app.mainView = frame;
 
-declare let env;
-if( env.DEBUG ) {
-	
+declare const DEBUG;
+if( DEBUG ) {
+	installHMR()	
+	sendAsyncIPC("openDevTools");
 }
 
 
