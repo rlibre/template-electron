@@ -11,7 +11,7 @@ let app = new Application( {
 // create the main frame
 let frame = new VLayout( {
     content: [
-        new Label( { text: "Your app is running" } ) // a small button
+        new Label( { text: "Welcome ! Your x4 electron app is running" } ) 
     ]
 });
 
