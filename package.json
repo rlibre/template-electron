@@ -10,8 +10,8 @@
     "license": "ISC",
     "dependencies": {
         "electron": "^20.0.3",
-        "x4electron": "^1.4.5",
-        "x4js": "^1.4"
+        "x4electron": "latest",
+        "x4js": "latest"
     },
     "x4build": {
  	"type": "electron",
