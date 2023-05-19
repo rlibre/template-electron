@@ -4,8 +4,6 @@
     "description": "aa project",
     "main": "src/index.html",
     "scripts": {
-        "build-dev": "x4build electron debug watch hmr",
-        "build-prod": "x4build electron release"
     },
     "keywords": [],
     "author": "",
@@ -15,10 +13,8 @@
         "x4electron": "^1.4.5",
         "x4js": "^1.4"
     },
-    "devDependencies": {
-        "x4build": "latest"
-    },
-	"x4build": {
-		"postBuild": [ "cp -ra ${srcdir}/src/assets/* ${outdir}" ]
-	}
+    "x4build": {
+ 	"type": "electron",
+	"postBuild": ["@copy ${srcdir}/src/assets ${outdir}"]
+    }
 }
